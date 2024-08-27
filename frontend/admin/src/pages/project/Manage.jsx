@@ -879,8 +879,8 @@ if (searchRef.current) {
 
      {/* Pagination */}
      <ReactPaginate
-      previousLabel={"Previous"}
-      nextLabel={"Next"}
+      previousLabel={<i class='bx bx-chevron-left' ></i>}
+      nextLabel={<i class='bx bx-chevron-right'></i>}
       breakLabel={"..."}
       pageCount={totalPages}
       marginPagesDisplayed={2}

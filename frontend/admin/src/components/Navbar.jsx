@@ -530,10 +530,10 @@ useEffect(() => {
                     </Link>
                   </li>
                   <li>
-                    <a className="dropdown-item" href="/preferences">
+                    <Link className="dropdown-item" to="/general">
                       <i className="bx bx-cog me-2" />
                       <span className="align-middle">Preferences</span>
-                    </a>
+                    </Link>
                   </li>
                   <li>
                     <div className="dropdown-divider" />

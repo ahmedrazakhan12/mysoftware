@@ -1042,8 +1042,8 @@ const isImage = urlEndsWithAny(url, imageTaskExtensions); // Add other image ext
             </tbody>
           </table>
           <ReactPaginate
-previousLabel={"Previous"}
-nextLabel={"Next"}
+   previousLabel={<i class='bx bx-chevron-left' ></i>}
+   nextLabel={<i class='bx bx-chevron-right'></i>}
 breakLabel={"..."}
 pageCount={pageCount}
 marginPagesDisplayed={2}

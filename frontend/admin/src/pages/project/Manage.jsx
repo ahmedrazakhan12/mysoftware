@@ -270,7 +270,7 @@ if (searchRef.current) {
   };
   
 
-  const [favId, setFavId] = useState({});
+  const [favId, setFavId] = useState([]);
 
   const fetchFavData = () => {
     axios.get(`http://localhost:5000/project/getFavProjectId/`, {
@@ -601,7 +601,7 @@ if (searchRef.current) {
                 >
                   <i
   className={
-    favId?.includes(item?.project?.id)
+    favId.length > 0 && favId?.includes(item?.project?.id)
       ? 'bx bxs-star favorite-icon text-warning m-0' 
       : 'bx bx-star favorite-icon text-warning m-0'
   }

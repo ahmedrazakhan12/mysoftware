@@ -2,28 +2,63 @@ const db = require("../models/index");
 require("dotenv").config();
 
 const notificationModel = db.notificationModel;
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
+
+// Extend dayjs with the relativeTime plugin
+dayjs.extend(relativeTime);
 
 exports.getNotification = async (req, res) => {
-try {
-    const { id } = req.params;
-    const notification = await notificationModel.findAll({
-        where: { userId: id },
-        order: [['createdAt', 'DESC']] ,
-        limit: 10 
-      });
-      
-    res.status(200).json({
-    status: "success",
-    data: notification,
-    });
-} catch (error) {
-    res.status(400).json({
-    status: "fail",
-    message: error.message,
-    });
-}
+    try {
+        const { id } = req.params;
+        const notifications = await notificationModel.findAll({
+            where: { userId: id },
+            order: [['createdAt', 'DESC']],
+            limit: 10
+        });
+
+        // Map through the notifications and add the time difference
+        const notificationsWithTime = notifications.map(notification => {
+            const timeDifference = dayjs(notification.createdAt).fromNow(); // '2 hours ago'
+            return {
+                ...notification.toJSON(),
+                timeAgo: timeDifference
+            };
+        });
+
+        res.status(200).json({
+            status: "success",
+            data: notificationsWithTime,
+        });
+    } catch (error) {
+        res.status(400).json({
+            status: "fail",
+            message: error.message,
+        });
+    }
 }
 
+
+// exports.getNotification = async (req, res) => {
+// try {
+//     const { id } = req.params;
+//     const notification = await notificationModel.findAll({
+//         where: { userId: id },
+//         order: [['createdAt', 'DESC']] ,
+//         limit: 10 
+//       });
+      
+//     res.status(200).json({
+//     status: "success",
+//     data: notification,
+//     });
+// } catch (error) {
+//     res.status(400).json({
+//     status: "fail",
+//     message: error.message,
+//     });
+// }
+// }
 exports.getNotificationAll = async (req, res) => {
     try {
         const { id } = req.params;
@@ -38,9 +73,18 @@ exports.getNotificationAll = async (req, res) => {
             offset: offset,           // Skip past results for pagination
         });
 
+        // Map through the notifications and add the time difference
+        const notificationsWithTime = notifications.rows.map(notification => {
+            const timeDifference = dayjs(notification.createdAt).fromNow(); // '2 hours ago'
+            return {
+                ...notification.toJSON(),
+                timeAgo: timeDifference
+            };
+        });
+
         res.status(200).json({
             status: "success",
-            data: notifications.rows,
+            data: notificationsWithTime,
             totalItems: notifications.count,
             currentPage: parseInt(page),
             totalPages: Math.ceil(notifications.count / limit),
@@ -52,6 +96,35 @@ exports.getNotificationAll = async (req, res) => {
         });
     }
 }
+
+// exports.getNotificationAll = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const { page = 1, limit = 10 } = req.query;
+
+//         const offset = (page - 1) * limit;
+
+//         const notifications = await notificationModel.findAndCountAll({
+//             where: { userId: id },
+//             order: [['createdAt', 'DESC']],
+//             limit: parseInt(limit),  // Limit the number of results
+//             offset: offset,           // Skip past results for pagination
+//         });
+
+//         res.status(200).json({
+//             status: "success",
+//             data: notifications.rows,
+//             totalItems: notifications.count,
+//             currentPage: parseInt(page),
+//             totalPages: Math.ceil(notifications.count / limit),
+//         });
+//     } catch (error) {
+//         res.status(400).json({
+//             status: "fail",
+//             message: error.message,
+//         });
+//     }
+// }
 
 exports.readNotification = async (req, res) => {
     try {

@@ -116,6 +116,7 @@ const [unread , setunread] = useState('unread')
                                             <th>Notification</th>
                                             <th style={{ textAlign: "center" }}>Time</th>
                                             <th style={{ textAlign: "center" }}>Date</th>
+                                            <th style={{ textAlign: "center" }}>Time ago</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -136,6 +137,12 @@ const [unread , setunread] = useState('unread')
                                                 <td className="align-middle text-center text-sm">
                                                     <p className="text-xs font-weight-bold mb-0" style={{ fontSize: "15px" }}>
                                                         {extractDate(item.time)}
+                                                    </p>
+                                                </td>
+                                                <td className="align-middle text-center text-sm">
+                                                    <p className="text-xs font-weight-bold mb-0" style={{ fontSize: "15px" }}>
+                                                    {item?.timeAgo || 'Just now'}
+
                                                     </p>
                                                 </td>
                                             </tr>

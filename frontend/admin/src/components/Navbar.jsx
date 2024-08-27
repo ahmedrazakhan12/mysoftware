@@ -353,9 +353,21 @@ const handleReadNotifications = (id , route) => {
 }
 
 useEffect(() => {
-  // setNotifications([]);
-  // fetchNotifications();
-},[location])
+  // Clear socket notifications when the route changes
+  setNotifications([]);
+  
+  // Fetch database notifications
+  fetchNotifications();
+
+  // Optionally, refetch the unread notifications count
+  fetchlength();
+  
+  // Cleanup socket listener on unmount
+  return () => {
+    socket.off('notification');
+  };
+}, [location]);
+
   return (
     <>
       {/* Navbar */}
@@ -425,7 +437,7 @@ useEffect(() => {
                   ) : (
                     limitedNotifications.map((notification, index) => (
                       <React.Fragment key={index}>
-                        <li style={{borderBottom:'1px solid #ccc' }} onClick={() => handleReadNotifications(notification?.id , notification?.route)} className={notification.read === 0 ? `unread p-3 cursor-pointer` : 'p-3 cursor-pointer'}>
+                        <li style={{borderBottom:'1px solid #ccc' }} onClick={() => handleReadNotifications(notification?.id , notification?.route)} className={notification.read === 0 ? `unread p-3 cursor-pointer mb-1` : 'mb-1 p-3 cursor-pointer'}>
                           <p>
                         
 
@@ -443,12 +455,13 @@ useEffect(() => {
                               </div>
                             </div>
                           </p>
-                         <div className="mb-3" style={{paddingBottom:'1px'}}>
+                         <div className="mb-2" style={{paddingBottom:'1px'}}>
                          <small className="text-capitalize float-start">
-                            {extractDate(notification?.time)}
+                            {/* {extractDate(notification?.time)} */}
                           </small>
                           <small className="text-capitalize float-end">
-                            {formatTime(notification?.time)}
+                            {notification?.timeAgo || 'Just now'}
+                            {/* {formatTime(notification?.time)} */}
                           </small>
                          </div>
                           

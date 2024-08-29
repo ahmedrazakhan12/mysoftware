@@ -365,8 +365,19 @@ const filteredMessages = recieveMessages.filter(msg =>
 
   
   const handleSendText = (e) => {
-    setText(e.target.value);
-    
+    const newText = e.target.value;
+  
+    if (newText.length > 7500) {
+      // Show SweetAlert if text length exceeds 7500 characters
+      Swal.fire({
+        icon: 'warning',
+        title: 'Text Too Long',
+        text: 'Your message exceeds the maximum allowed length of 7500 characters.',
+        confirmButtonText: 'OK',
+      });
+      return
+    }
+    setText(newText);
     if (e.target.value.length !== 0 || text.length !== 0) {
       scrollToBottom();
       const messageData = { fromId: activeId, toId: id, status: 1 };
@@ -646,7 +657,7 @@ const [chatBarUsers , setChatBarUsers] = useState([])
   //     console.error('No file selected');
   //   }
   // };
-  
+ 
 
   const handleSendMessage  = (e) => {
     e.preventDefault();
@@ -669,10 +680,10 @@ const [chatBarUsers , setChatBarUsers] = useState([])
           loggedUser: loggedUser,
           fromId: activeId,
           usersID: [Number(id)],
-          text:`${loggedUser?.name} has sent you a message.`,
+          text: text.length > 30 ? `${text.substring(0, 30)}...` : text,
           
           time: new Date().toLocaleString(),
-          route: '/chat',
+          route: `/chat/${loggedUser.id}`,
         };
         socket.emit('newNotification', notification, (response) => {
           if (response && response.status === 'ok') {
@@ -703,6 +714,12 @@ const [chatBarUsers , setChatBarUsers] = useState([])
       //     console.error('Message delivery failed or no response from server');
       //   }
       // });
+    }
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      // event.preventDefault(); // Prevents the default newline behavior
+      handleSendMessage(event)
     }
   };
   
@@ -1150,17 +1167,33 @@ useEffect(() => {
     <FontAwesomeIcon icon={faFaceSmile} />
     <span className="fas fa-smile" />
     </button>
+
    {file === null && 
-    <input
-    type='text'
-    name="message"
-    className="m-send app-scroll"
-    value={text}
-    onChange={handleSendText}
-    placeholder="Type a Message.."
-    style={{ overflow: "hidden", overflowWrap: "break-word", height: 44 }}
-    // defaultValue={""}
-  />}
+  //   <input
+  //   type='text'
+  //   name="message"
+  //   className="m-send app-scroll"
+  //   value={text}
+  //   onChange={handleSendText}
+  //   placeholder="Type a Message.."
+  //   style={{ overflow: "hidden", overflowWrap: "break-word", height: 44 }}
+  //   maxLength={7500}  // This restricts the input to 7500 characters
+  
+  //   // defaultValue={""}
+  // />
+  <textarea
+  name="message"
+  className="m-send app-scroll"
+  value={text}
+  onChange={handleSendText}
+  onKeyDown={handleKeyDown}
+  placeholder="Type a Message.."
+  style={{ maxHeight:'800px' }}
+  maxLength={7500}  //.. This restricts the input to 7500 characters
+/>
+
+
+  }
 
   {file !== null  && (
     <div className="attachment-preview" style={{width:'100%'}}>

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import io from "socket.io-client";
 const socketConnect = io("http://localhost:5000" ,
   //  {autoConnect: false}
@@ -8,6 +8,7 @@ const socketConnect = io("http://localhost:5000" ,
 
 const AppContext = createContext();
 export const AppProvider = ({ children }) => {
+  const {id} = useParams();
   const [isMenuExpanded, setIsMenuExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isOpen1, setIsOpen1] = useState(false);
@@ -57,6 +58,7 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
+        id,
         isMenuExpanded,
         setIsMenuExpanded,
         setIsOpen,

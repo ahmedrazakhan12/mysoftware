@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 // import Image from "../assets/images/gmg-not.png"
 import Notify from '../assets/audio/notify.wav';
@@ -11,7 +11,7 @@ const Navbar = () => {
   const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
   const activeId = localStorage.getItem("id");
-  const location = useLocation();
+  // const location = useLocation();
 
 
   const {
@@ -20,7 +20,8 @@ const Navbar = () => {
     setAppNotification,
     notifyLength,
     setnotifyLength,
-    notify , setNotify
+    notify , setNotify,
+    location
   } = useAppContext();
 
   useEffect(() => {
@@ -52,6 +53,11 @@ const Navbar = () => {
       if(Number(data.loggedUser.id) === Number(activeId)){
         return
       }
+      console.log("data.groupId" , data.groupId , "id: " , location);
+
+      if(data.groupId.pathname == location.pathname ){
+        return
+      }
       setNotifications((prevNotifications) => [
         { ...data, read: 0 },
         ...prevNotifications,
@@ -62,12 +68,12 @@ const Navbar = () => {
         // Request permission to show notifications
         Notification.requestPermission().then((permission) => {
           if (permission === "granted") {
-            const capitalizedText = data.text
+            const capitalizedText = data?.loggedUser?.groupName?.text || data.text
               .split(' ')
               .map(word => word.charAt(0).toUpperCase() + word.slice(1))
               .join(' ');
 
-              const capitalizedText2 = data.loggedUser.name
+              const capitalizedText2 = data?.loggedUser?.groupName?.groupName || data.loggedUser.name
               .split(' ')
               .map(word => word.charAt(0).toUpperCase() + word.slice(1))
               .join(' ');
@@ -75,8 +81,8 @@ const Navbar = () => {
             // Create an image object
             const image = new Image();
             image.crossOrigin = "Anonymous"; // Allow cross-origin requests
-            image.src = data.loggedUser.pfpImage;
-      
+            // image.src = data.loggedUser.pfpImage;
+            image.src =data?.loggedUser?.groupName?.groupImage || data?.loggedUser?.pfpImage ;
             // When the image loads, draw it to a canvas and make it circular
             image.onload = () => {
               const canvas = document.createElement('canvas');
@@ -443,12 +449,13 @@ useEffect(() => {
 
                             <div className="row">
                               <div className="col-4">
-                            <b className="text-capitalize">
+                            {/* <b className="text-capitalize">
                               {index + 1}.
-                            </b>{" "}
-                                <img src={notification?.loggedUser?.pfpImage} alt="" className="rounded-circle me-2" style={{objectFit:'cover' , width:'30px' , height:'30px'}}/>
+                            </b>{" "} */}
+                                <img src={notification?.loggedUser?.groupName?.groupImage || notification?.loggedUser?.pfpImage} alt="" className="rounded-circle me-2" style={{objectFit:'cover' , width:'45px' , height:'45px'}}/>
                               </div>
                               <div style={{marginLeft:'-60px'}} className="col">
+                                <b className="text-capitalize">{notification?.loggedUser?.groupName?.groupName || notification?.loggedUser?.name}</b><br />
                                 <b  className="text-capitalize" style={{fontWeight:'600'}}>
                                   {notification.text}
                                 </b>
@@ -491,7 +498,6 @@ useEffect(() => {
               </ul>
               </li>
 
-              
               {/* User */}
               <li className="nav-item navbar-dropdown dropdown">
                 <a

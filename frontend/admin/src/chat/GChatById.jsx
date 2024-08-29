@@ -113,9 +113,7 @@ const GChatById = () => {
   }, [id]);
   
 
-  
-
-useEffect(() => {
+  const fetchDbChats = async () => {
     axios.get(`http://localhost:5000/chat/getChattingById/${id}`)
     .then((res) => {
     //   setRecieveDbMessages(prevMessages => [...prevMessages, ...]);
@@ -127,6 +125,10 @@ useEffect(() => {
     .catch((err) => {
       console.log("Error getting Groups:", err);
     });
+  }
+
+useEffect(() => {
+  fetchDbChats();
 },[id])
 
 
@@ -188,7 +190,20 @@ useEffect(() => {
 
   
   const handleSendText = (e) => {
-    setText(e.target.value);
+
+    const newText = e.target.value;
+  
+    if (newText.length > 7500) {
+      // Show SweetAlert if text length exceeds 7500 characters
+      Swal.fire({
+        icon: 'warning',
+        title: 'Text Too Long',
+        text: 'Your message exceeds the maximum allowed length of 7500 characters.',
+        confirmButtonText: 'OK',
+      });
+      return
+    }
+    setText(newText);
     
         if (e.target.value.length !== 0 || text.length !== 0) {
         scrollToBottom();
@@ -352,12 +367,22 @@ socket.on('allusers', (res) => {
   const handleChatUser = (id) => {
     navigate(`/chat/${id}`);
     setData([]);
+    setRecieveMessages([]);
+    fetchDbChats();
+
+    fetchGroupData();
     setSearchValue("");
     setDisplay(false);
     setIsSearchData(false);
   };
 
  
+
+  useEffect(() => {
+    setRecieveMessages([]);
+    setRecieveDbMessages([]);
+    fetchDbChats();
+  } ,[id])
 
 
 
@@ -521,6 +546,7 @@ socket.on('allusers', (res) => {
       console.log("Last File:  ",file);
       const messageData = {
         fromId: activeId,
+        loggedUser:loggedUser,
         pfpImage: loggedUser?.pfpImage,
         toId: id,
         text,
@@ -542,15 +568,20 @@ socket.on('allusers', (res) => {
         if (response.status === 'ok') {
           // console.log(response.msg);
           const notification = {
-             loggedUser: loggedUser,
-
             fromId: activeId,
             usersID: [...groupData?.groupUsers?.map(user => user.id) || [], Number(groupData?.creator?.id)],
-            loggedUser : loggedUser,
-            text:`${loggedUser?.name} sent a new text in group "${groupData?.group?.groupName}". `,
+            loggedUser: {
+              ...loggedUser,
+              groupName: groupData.group,
+              // You can add other properties from groupData if needed
+          },          
+            text:text.length > 30 ? `${loggedUser?.name}: ${text.substring(0, 30)}...` : `${loggedUser?.name}: ${text}`,
             time: new Date().toLocaleString(),
             route: `/groupchat/${id}`,
+            groupId: location
           };
+
+
           socket.emit('newNotification', notification, (response) => {
             if (response && response.status === 'ok') {
               console.log(response.msg);
@@ -1009,6 +1040,7 @@ recieveDbMessages.forEach((msg, index) => {
         dialogClassName="modal-dialog-centered" // Add this line
 
       >
+        
         <form onSubmit={handleSubmit} encType='multipart/form-data'>
         <Modal.Header closeButton>
           <Modal.Title>Setting</Modal.Title>
@@ -1379,7 +1411,6 @@ recieveDbMessages.forEach((msg, index) => {
     style={{ overflow: "hidden", overflowWrap: "break-word", height: 44 }}
     // defaultValue={""}
   />}
-
   {file !== null  && (
     <div className="attachment-preview" style={{width:'100%'}}>
       <p>{file.name}</p>

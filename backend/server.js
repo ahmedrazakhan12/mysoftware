@@ -40,7 +40,7 @@ db.sequelize
 const app = express();
 
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'token'],
     credentials: true

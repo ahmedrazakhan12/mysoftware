@@ -1532,7 +1532,13 @@ const filteredChatBarUsers = chatBarUsers.filter(
                     {item.name}{" "}
                     <span className='badge bg-success text-white'>{item.unseenMessages !== 0 && item.unseenMessages}</span>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span className='d-block m-0 p-0 '>{item.unseenMessages !== 0 ?  `${item.unseenMessages} unread messages.` : item.latestText}</span>
+                  
+
+                        <span className='d-block m-0 p-0 '>{item.unseenMessages !== 0 ?  `${item.unseenMessages} unread messages.` :  item.latestText 
+                                    ? (item.latestText.length > 10 
+                                        ? item.latestText.substring(0, 30) + '...' 
+                                        : item.latestText)
+                                    : item.latestText}</span>
                     </div>
                 </td>
             </tr>
@@ -1597,8 +1603,13 @@ const filteredChatBarUsers = chatBarUsers.filter(
         <td className='text-capitalize '>
             {item.groupName}{"  "}
             {item.unreadCount === 0 &&
+            
             <div className='d-flex justify-content-between'>
-              <p className='text-muted' style={{fontSize:'12px'}}>{item.lastMessage}</p>
+              {/* <p className='text-muted' style={{fontSize:'12px'}}>{item.lastMessage}</p> */}
+              <p className='text-muted' style={{fontSize:'12px'}}>
+              {item.lastMessage.length > 10 ? item.lastMessage.substring(0, 10) + '...' : item.lastMessage}
+            </p>
+
               <p className='text-muted' style={{fontSize:'12px'}}>{formatTimeWithAMPM(item.latestMessageTime)}</p>
             </div>
             }
@@ -1629,7 +1640,10 @@ const filteredChatBarUsers = chatBarUsers.filter(
             {item?.groupName}{"  "}
             {item?.unreadCount === 0 &&
             <div className='d-flex justify-content-between'>
-              <p className='text-muted' style={{fontSize:'12px'}}>{item.lastMessage}</p>
+              <p className='text-muted' style={{fontSize:'12px'}}>        
+                  {item.lastMessage.length > 10 ? item.lastMessage.substring(0, 10) + '...' : item.lastMessage}
+              </p>
+              
               <p className='text-muted' style={{fontSize:'12px'}}>{formatTimeWithAMPM(item.latestMessageTime)}</p>
             </div>
             }

@@ -4,6 +4,8 @@ require("dotenv").config();
 
 const privateKey = process.env.PRIVATE_KEY;
 const adminModel = db.adminModel;
+const {uploadMedia} = require("../includes/uploads3");
+
 
 const {
   validateName,
@@ -291,7 +293,7 @@ exports.adminRegister = async (req, res) => {
     }
     const imageIs = req.body.pfpImage;
     console.log(imageIs);
-    let imagePath = "http://localhost:5000/public/uploads/pfp/avatar.jpg";
+    let imagePath = "https://project-mgt.s3.ap-southeast-2.amazonaws.com/image/1725274954268-avatar.jpg";
 
     // Check if req.file exists (new profile picture uploaded)
     if (req.file) {
@@ -559,6 +561,37 @@ exports.imageDel = async (req, res) => {
 };
 
 
+// exports.adminSingleProfilePicUpdate = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     // Check if req.file exists and is not empty
+//     if (!req.file || req.file === "") {
+//       return res.status(400).json({ message: "No file uploaded" });
+//     }
+
+//     let imagePath = null;
+
+//     // Process the uploaded file
+//     if (req.file) {
+//       console.log("File received: ", req.file.filename);
+//       const photoFileName = req.file.filename;
+//       console.log("PhotoFileName: ", photoFileName);
+//       imagePath = `http://localhost:5000/public/uploads/pfp/${photoFileName}`;
+//     }
+
+//     await adminModel.update({ pfpImage: imagePath }, { where: { id: id } });
+//     console.log("image updated");
+//     res.status(200).json({ message: "Profile Image updated successfully" });
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// }
+
+const fs = require('fs');
+const path = require('path');
+
 exports.adminSingleProfilePicUpdate = async (req, res) => {
   try {
     const { id } = req.params;
@@ -573,16 +606,35 @@ exports.adminSingleProfilePicUpdate = async (req, res) => {
     // Process the uploaded file
     if (req.file) {
       console.log("File received: ", req.file.filename);
-      const photoFileName = req.file.filename;
-      console.log("PhotoFileName: ", photoFileName);
-      imagePath = `http://localhost:5000/public/uploads/pfp/${photoFileName}`;
+
+      // Read the file from the disk
+      const filePath = path.join(__dirname, '..', 'public', 'uploads', 'pfp', req.file.filename);
+      const fileContent = fs.readFileSync(filePath);
+
+      // Prepare mediaItem for S3 upload
+      const mediaItem = {
+        filename: req.file.filename,
+        data: fileContent,  // File content read from disk
+        type: req.file.mimetype
+      };
+
+      // Upload the file to S3
+      const s3Urls = await uploadMedia([mediaItem]);
+
+      if (s3Urls && s3Urls.length > 0) {
+        imagePath = s3Urls[0]; // Assuming the first URL is the profile picture URL
+      } else {
+        return res.status(500).json({ message: "Failed to upload image to S3" });
+      }
     }
 
+    // Update the profile image in the database
     await adminModel.update({ pfpImage: imagePath }, { where: { id: id } });
-    console.log("image updated");
+    console.log("Image updated");
+
     res.status(200).json({ message: "Profile Image updated successfully" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Internal server error" });
   }
-}
+};
